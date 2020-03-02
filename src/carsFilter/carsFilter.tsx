@@ -1,18 +1,17 @@
 import React from 'react';
 import { Form, Button } from 'react-bootstrap';
-import { Context, getParamsFromUrl } from '../context';
-import { observer } from 'mobx-react';
+import { getParamsFromUrl, FilterInfo } from '../context';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 
-@observer
-class CarsFilter extends React.Component<RouteComponentProps, {
+interface ICarsFilterProps extends RouteComponentProps {
+    filterInfo: FilterInfo;
+}
+
+class CarsFilter extends React.Component<ICarsFilterProps, {
     color?: string;
     manufacturer?: string;
 }> {
-    static contextType = Context;
-    context!: React.ContextType<typeof Context>
-
     constructor(props: any) {
         super(props);
 
@@ -69,14 +68,14 @@ class CarsFilter extends React.Component<RouteComponentProps, {
                     <Form.Label className="h5">Color</Form.Label>
                     <Form.Control key={`${this.props.location.key}-c`} as="select" value={this.state.color} onChange={(e) => this.setColor(e.currentTarget.value)}>
                         <option key='' value=''>All car colors</option>
-                        {this.context.filterInfo.colors.map((c) => <option key={c} value={c}>{c}</option>)}
+                        {this.props.filterInfo.colors.map((c) => <option key={c} value={c}>{c}</option>)}
                     </Form.Control>
                 </Form.Group>
                 <Form.Group controlId="manufacturer">
                     <Form.Label className="h5">Manufacturer</Form.Label>
                     <Form.Control key={`${this.props.location.key}-m`} as="select" value={this.state.manufacturer} onChange={(e) => this.setManufacturer(e.currentTarget.value)}>
                         <option key='' value=''>All manufacturers</option>
-                        {this.context.filterInfo.manufacturers.map((c) => <option key={c} value={c}>{c}</option>)}
+                        {this.props.filterInfo.manufacturers.map((c) => <option key={c} value={c}>{c}</option>)}
                     </Form.Control>
                 </Form.Group>
                 <Button variant="primary" type="submit" className="float-right" onClick={this.search}>

@@ -27,30 +27,11 @@ class PageInfo {
     @observable loading: boolean = false;
 }
 
-class FilterInfo {
-    @observable colors: string[] = [];
-    @observable manufacturers: string[] = [];
+export class FilterInfo {
+    colors: string[] = [];
+    manufacturers: string[] = [];
 
-    @observable ready: boolean = false;
-
-    constructor() {
-    }
-
-    load() {
-        Promise.all([fetch('https://auto1-mock-server.herokuapp.com/api/colors').then((res) => res.json()).then((res) => {
-            runInAction(() => {
-                this.colors = res.colors;
-            })
-        }), fetch('https://auto1-mock-server.herokuapp.com/api/manufacturers').then((res) => res.json()).then((res) => {
-            runInAction(() => {
-                this.manufacturers = res.manufacturers.map((m: any) => m.name);
-            })
-        })]).then(() => {
-            runInAction(() => {
-                this.ready = true;
-            })
-        });
-    }
+    ready: boolean = false;
 }
 
 export function getParamsFromUrl(search: string) {
@@ -68,7 +49,7 @@ export function getParamsFromUrl(search: string) {
 
 export class CarsStore {
     private _pageInfo: PageInfo;
-    private _filterInfo: FilterInfo;
+    @observable private _filterInfo: FilterInfo;
     @observable private _selectedCar: ICar | undefined;
     @observable private _selectedCarLoading: boolean;
     @observable private _orders: IOrder[] = [];
@@ -76,7 +57,6 @@ export class CarsStore {
     constructor() {
         this._pageInfo = new PageInfo();
         this._filterInfo = new FilterInfo();
-        this._filterInfo.load();
         this._selectedCar = undefined;
         this._selectedCarLoading = true;
 
@@ -93,6 +73,21 @@ export class CarsStore {
 
         reaction(() => this._orders.length, () => {
             localStorage.setItem("orders", JSON.stringify(toJS(this._orders)));
+        });
+
+        this.loadFilters();
+    }
+
+    loadFilters() {
+        Promise.all([
+        fetch('https://auto1-mock-server.herokuapp.com/api/colors').then((res) => res.json()), 
+        fetch('https://auto1-mock-server.herokuapp.com/api/manufacturers').then((res) => res.json())]).then(([c, m]) => {
+            runInAction(() => {
+                this._filterInfo = new FilterInfo();
+                this._filterInfo.manufacturers = m.manufacturers.map((m: any) => m.name);
+                this._filterInfo.colors = c.colors;
+                this._filterInfo.ready = true;
+            })
         });
     }
 

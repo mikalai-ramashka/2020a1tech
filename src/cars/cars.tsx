@@ -3,7 +3,7 @@ import { Container, Row, Col, Button } from 'react-bootstrap';
 import './cars.scss';
 import { CarsFilter } from '../carsFilter';
 import { Pager } from '../pager';
-import { ICar, IOrder, getParamsFromUrl } from '../context';
+import { ICar, IOrder, getParamsFromUrl, FilterInfo } from '../context';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { LinkContainer } from 'react-router-bootstrap';
 
@@ -13,6 +13,7 @@ interface CarsProps extends RouteComponentProps {
     totalItems: number;
     loading: boolean;
     items: ICar[];
+    filterInfo: FilterInfo;
     onLoad(page: number, manufacturer: string, color: string): void;
 }
 
@@ -54,7 +55,7 @@ class Cars extends React.Component<CarsProps> {
                     <Col md={4} className="pt-4 pb-4">
                         <div className="card">
                             <div className="card-body">
-                                <CarsFilter></CarsFilter>
+                                <CarsFilter filterInfo={this.props.filterInfo}></CarsFilter>
                             </div>
                         </div>
                     </Col>

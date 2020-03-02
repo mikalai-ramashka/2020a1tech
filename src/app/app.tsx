@@ -18,7 +18,7 @@ export function App() {
               <Cars 
                 items={context.pageInfo.items} loading={context.pageInfo.loading} page={context.pageInfo.page}
                 totalItems={context.pageInfo.totalItems} totalPages={context.pageInfo.totalPages}
-                onLoad={(p, m, c) => context.load(p, m, c)}
+                onLoad={(p, m, c) => context.load(p, m, c)} filterInfo={context.filterInfo}
               ></Cars>
             </Route>
             <Route exact path="/car/:id">
