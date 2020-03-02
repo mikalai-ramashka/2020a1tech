@@ -41,11 +41,11 @@ class CarsFilter extends React.Component<ICarsFilterProps, {
     }
 
     setColor(color: string) {
-        this.setState({ color });
+        this.setState({ color: color });
     }
 
     setManufacturer(manufacturer: string) {
-        this.setState({ manufacturer });
+        this.setState({ manufacturer: manufacturer });
     }
 
     search(e: React.FormEvent<HTMLButtonElement>) {

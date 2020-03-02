@@ -40,7 +40,7 @@ export function getParamsFromUrl(search: string) {
 
     url.split("&").forEach((part: string) => {
         const item = part.split("=");
-        if (item[1] != undefined) {
+        if (item[1] !== undefined) {
             result.set(item[0], decodeURIComponent(item[1]));
         }
     });
@@ -62,8 +62,8 @@ export class CarsStore {
 
         const r = getParamsFromUrl(window.location.search);
 
-        this._filterInfo.colors = [r.get('color')];
-        this._filterInfo.manufacturers = [r.get('manufacturer')];
+        this._filterInfo.colors = r.get('color') ? [r.get('color')] : [];
+        this._filterInfo.manufacturers = r.get('manufacturer') ? [r.get('manufacturer')] : [];
 
         const orders = localStorage.getItem("orders");
 
