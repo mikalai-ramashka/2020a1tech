@@ -1,7 +1,7 @@
 @import '../variables';
 @import '../mixin';
 
-.cars {
+.cars, .car-details {
     @include border-top;
 }
 
@@ -13,5 +13,14 @@
         img {
             opacity: 0;
         }
+    }
+}
+
+.car-details {
+    padding: 0;
+    
+    .photos {
+        background-color: $color-light;
+        height: 160px;
     }
 }

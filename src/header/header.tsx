@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Navbar, Nav } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import './header.scss'
 import { Logo } from '../logo/logo';
+import { useObserver } from 'mobx-react';
+import { CarsStore, Context } from '../context';
 
 export function Header() {
-  return (
+  const context = useContext<CarsStore>(Context);
+
+  return useObserver(() => (
     <Navbar className="header">
         <Navbar.Brand>
           <Logo></Logo>
@@ -15,12 +19,15 @@ export function Header() {
             <Nav.Link className="h5">Purchase</Nav.Link>
           </LinkContainer>
           <LinkContainer to="/orders">
-            <Nav.Link className="h5">My Orders</Nav.Link>
+            <Nav.Link className="h5">
+              My Orders&nbsp;
+              {context.orders.length > 0 && <span className="badge badge-primary">{context.orders.length}</span>}
+            </Nav.Link>
           </LinkContainer>
           <LinkContainer to="/sell">
             <Nav.Link className="h5">Sell</Nav.Link>
           </LinkContainer>
         </Nav>
     </Navbar>
-  );
+  ));
 }

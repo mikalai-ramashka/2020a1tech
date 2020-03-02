@@ -1,5 +1,5 @@
 import React from 'react';
-import { observable, runInAction, action } from 'mobx';
+import { observable, runInAction, action, reaction, toJS } from 'mobx';
 
 export interface ICar {
     stockNumber: number;
@@ -12,6 +12,11 @@ export interface ICar {
     fuelType: 'Diesel' | 'Petrol',
     color: string;
     pictureUrl: string;
+}
+
+export interface IOrder {
+    car: ICar;
+    id: string;
 }
 
 class PageInfo {
@@ -51,18 +56,31 @@ class FilterInfo {
 export class CarsStore {
     private _pageInfo: PageInfo;
     private _filterInfo: FilterInfo;
-    @observable private _cars: ICar[];
+    @observable private _selectedCar: ICar | undefined;
+    @observable private _selectedCarLoading: boolean;
+    @observable private _orders: IOrder[] = [];
 
     constructor() {
         this._pageInfo = new PageInfo();
         this._filterInfo = new FilterInfo();
         this._filterInfo.load();
-        this._cars = [];
+        this._selectedCar = undefined;
+        this._selectedCarLoading = true;
 
         const r = this.getParamsFromUrl(window.location.search);
 
         this._filterInfo.colors = [r.get('color')];
         this._filterInfo.manufacturers = [r.get('manufacturer')];
+
+        const orders = localStorage.getItem("orders");
+
+        if (orders) {
+            this._orders = JSON.parse(orders);
+        }
+
+        reaction(() => this._orders.length, () => {
+            localStorage.setItem("orders", JSON.stringify(toJS(this._orders)));
+        });
     }
 
     getParamsFromUrl(search: string) {
@@ -100,6 +118,43 @@ export class CarsStore {
                 this._pageInfo.totalItems = res.totalCarsCount;
             })
         });
+    }
+
+    @action loadCar(id: string) {
+        this._selectedCarLoading = true;
+        fetch(`https://auto1-mock-server.herokuapp.com/api/cars/` + id).then((res) => res.json()).then((res) => {
+            runInAction(() => {
+                this._selectedCarLoading = false;
+                this._selectedCar = res.car;
+            })
+        });
+    }
+
+    @action orderSelectedCar() {
+        this._orders.push({ 
+            id: `${this.selectedCar.stockNumber}-${Date.now()}`,
+            car: JSON.parse(JSON.stringify(this.selectedCar))
+        });
+    }
+
+    @action removeOrderedCar(order: IOrder) {
+        const index = this.orders.indexOf(order);
+
+        if (index >= 0) {
+            this._orders.splice(index, 1);
+        }
+    }
+
+    get orders() {
+        return this._orders;
+    }
+
+    get selectedCar(): ICar {
+        return this._selectedCar as ICar;
+    }
+
+    get isSelectedCarLoading() {
+        return this._selectedCarLoading;
     }
 
     get filterInfo() {

@@ -1,9 +1,9 @@
 import React from 'react';
-import { BrowserRouter as Router, Switch, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { Header } from '../header';
 import { Footer } from '../footer';
 import { Page404 } from '../404';
-import { Cars } from '../cars';
+import { Cars, CarDetails, CarOders } from '../cars';
 
 export function App() {
   return (
@@ -13,8 +13,11 @@ export function App() {
             <Route exact path="/">
               <Cars></Cars>
             </Route>
-            
+            <Route exact path="/car/:id">
+              <CarDetails></CarDetails>
+            </Route>
             <Route path="/orders">
+              <CarOders></CarOders>
             </Route>
             <Route path="*">
               <Page404></Page404>
