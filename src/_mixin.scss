@@ -1,0 +1,5 @@
+@import './variables';
+
+@mixin border-top {
+    border-top: 1px solid $color-light;
+}

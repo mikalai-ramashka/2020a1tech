@@ -1,0 +1,17 @@
+@import '../variables';
+@import '../mixin';
+
+.cars {
+    @include border-top;
+}
+
+.car-card.loading {
+    .load-content {
+        background-color: $color-light;
+        color: $color-light;
+
+        img {
+            opacity: 0;
+        }
+    }
+}

@@ -1,0 +1,5 @@
+@import '../mixin';
+
+.page-404 {
+    @include border-top;
+}

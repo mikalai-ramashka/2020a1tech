@@ -1,0 +1,14 @@
+// Override default variables before the import
+@import './_variables';
+// Import Bootstrap and its default variables
+@import '~bootstrap/scss/bootstrap.scss';
+
+.h1, h1 {
+    font-weight: 600;
+}
+
+.btn {
+    min-width: 128px;
+    font-size: $font-size-base * 0.875;
+    padding-bottom: 5px;
+}

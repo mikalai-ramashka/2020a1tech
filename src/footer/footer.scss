@@ -1,0 +1,10 @@
+@import '../variables';
+@import '../mixin';
+
+.footer {
+    display: flex;
+    min-height: $spacer * 5;
+    justify-content: center;
+    align-items: center;
+    @include border-top;
+}
