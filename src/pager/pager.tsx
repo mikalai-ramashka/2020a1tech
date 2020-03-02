@@ -1,14 +1,13 @@
-import React, { ReactNode, useContext, ReactNodeArray } from 'react';
+import React, { ReactNode, ReactNodeArray } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { useLocation } from 'react-router-dom';
-import { Context, CarsStore } from '../context';
+import { getParamsFromUrl } from '../context';
 import { LinkContainer } from 'react-router-bootstrap';
 
 function useQuery() {
     const url = useLocation().search;
-    const context = useContext<CarsStore>(Context);
 
-    return context.getParamsFromUrl(url);
+    return getParamsFromUrl(url);
 }
 
 function useSearch(page: number) {
@@ -19,7 +18,6 @@ function useSearch(page: number) {
 }
 
 export function Pager(props: {
-    loading: boolean;
     currentPage: number;
     totalPages: number;
     children?: ReactNode | ReactNodeArray;

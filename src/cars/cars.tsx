@@ -3,20 +3,24 @@ import { Container, Row, Col, Button } from 'react-bootstrap';
 import './cars.scss';
 import { CarsFilter } from '../carsFilter';
 import { Pager } from '../pager';
-import { Context, ICar, IOrder } from '../context';
-import { observer } from 'mobx-react';
+import { ICar, IOrder, getParamsFromUrl } from '../context';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { LinkContainer } from 'react-router-bootstrap';
 
-@observer
-class Cars extends React.Component<RouteComponentProps> {
-    static contextType = Context;
-    context!: React.ContextType<typeof Context>
+interface CarsProps extends RouteComponentProps {
+    totalPages: number;
+    page: number;
+    totalItems: number;
+    loading: boolean;
+    items: ICar[];
+    onLoad(page: number, manufacturer: string, color: string): void;
+}
 
+class Cars extends React.Component<CarsProps> {
     load() {
-        const r = this.context.getParamsFromUrl(this.props.location.search);
+        const r = getParamsFromUrl(this.props.location.search);
 
-        this.context.load(r.get('page'), r.get('manufacturer'), r.get('color'));
+        this.props.onLoad(r.get('page'), r.get('manufacturer'), r.get('color'));
     }
 
     componentDidMount() {
@@ -32,14 +36,14 @@ class Cars extends React.Component<RouteComponentProps> {
     get showing() {
         const pageSize = 10;
 
-        if (this.context.pageInfo.page < this.context.pageInfo.totalPages) {
-            if (this.context.pageInfo.page === 1) {
-                return `${pageSize} of ${this.context.pageInfo.totalItems}`;
+        if (this.props.page < this.props.totalPages) {
+            if (this.props.page === 1) {
+                return `${pageSize} of ${this.props.totalItems}`;
             } else {
-                return `${pageSize * (this.context.pageInfo.page - 1)} - ${pageSize * this.context.pageInfo.page} of ${this.context.pageInfo.totalItems}`;
+                return `${pageSize * (this.props.page - 1)} - ${pageSize * this.props.page} of ${this.props.totalItems}`;
             }
         } else {
-            return `${pageSize * (this.context.pageInfo.page - 1)} - ${Math.min(pageSize * this.context.pageInfo.page, this.context.pageInfo.totalItems)} of ${this.context.pageInfo.totalItems}`;
+            return `${pageSize * (this.props.page - 1)} - ${Math.min(pageSize * this.props.page, this.props.totalItems)} of ${this.props.totalItems}`;
         }
     }
 
@@ -56,12 +60,11 @@ class Cars extends React.Component<RouteComponentProps> {
                     </Col>
                     <Col md={8} className="pt-4 pb-4">
                         <Pager 
-                            currentPage={this.context.pageInfo.page} 
-                            totalPages={this.context.pageInfo.totalPages} 
-                            loading = {this.context.pageInfo.loading}>
-                            {this.context.pageInfo.loading ? <p className='h1' style={{marginBottom: 31}}>Loading</p> : <p className='h3'>Available cars</p>}
-                            {!this.context.pageInfo.loading && <p className='h5 mb-4'>Showing {this.showing} results</p>}
-                            <CarsList cars={this.context.pageInfo.items} isLoading={this.context.pageInfo.loading}></CarsList>
+                            currentPage={this.props.page} 
+                            totalPages={this.props.totalPages}>
+                            {this.props.loading ? <p className='h1' style={{marginBottom: 31}}>Loading</p> : <p className='h3'>Available cars</p>}
+                            {!this.props.loading && <p className='h5 mb-4'>Showing {this.showing} results</p>}
+                            <CarsList cars={this.props.items} isLoading={this.props.loading}></CarsList>
                         </Pager>
                     </Col>
                 </Row>
@@ -89,7 +92,7 @@ export function CarInfo(props: {
         <div className="row no-gutters">
             <div className="col-lg-1 p-2">
                 <div className='wrapper load-content'>
-                    <img src={car.pictureUrl} className="card-img" alt="Picture"/>
+                    <img src={car.pictureUrl} className="card-img" alt="Car"/>
                 </div>
             </div>
             <div className="col-lg-11">
@@ -111,11 +114,14 @@ const CarswithRouter = withRouter(Cars);
 
 export { CarswithRouter as Cars };
 
-@observer
-class CarDetails extends React.Component<RouteComponentProps<{ id: string }>> {
-    static contextType = Context;
-    context!: React.ContextType<typeof Context>
+interface CarDetailsProps extends RouteComponentProps<{ id: string }> {
+    loadCar(id: string): void;
+    loading: boolean;
+    order(): void;
+    car: ICar;
+}
 
+class CarDetails extends React.Component<CarDetailsProps> {
     constructor(props: any) {
         super(props);
 
@@ -123,7 +129,7 @@ class CarDetails extends React.Component<RouteComponentProps<{ id: string }>> {
     }
 
     load() {
-        this.context.loadCar(this.props.match.params.id);
+        this.props.loadCar(this.props.match.params.id);
     }
 
     componentDidMount() {
@@ -137,17 +143,17 @@ class CarDetails extends React.Component<RouteComponentProps<{ id: string }>> {
     }
 
     save() {
-        this.context.orderSelectedCar();
+        this.props.order();
     }
 
     renderCarInfo() {
-        if (this.context.isSelectedCarLoading) {
+        if (this.props.loading) {
             return (<p className="h1 mt-4 mb-4">
                 Loading
             </p>);
         }
 
-        const car = this.context.selectedCar;
+        const car = this.props.car;
 
         return (<React.Fragment>
             <p className="h1 mt-4 mb-4">
@@ -185,7 +191,7 @@ class CarDetails extends React.Component<RouteComponentProps<{ id: string }>> {
                                                     If you like this car, click the button and save it in your collection of favourite items.
                                                 </p>
                                                 <p>
-                                                    <Button variant="primary" disabled={this.context.isSelectedCarLoading} type="button" className="float-right" onClick={this.save}>
+                                                    <Button variant="primary" disabled={this.props.loading} type="button" className="float-right" onClick={this.save}>
                                                         Save
                                                     </Button>
                                                 </p>
@@ -206,12 +212,12 @@ const CarDetailswithRouter = withRouter(CarDetails);
 
 export { CarDetailswithRouter as CarDetails };
 
+interface CarOdersProps {
+    remove(order: IOrder): void;
+    orders: IOrder[];
+}
 
-@observer
-export class CarOders extends React.Component {
-    static contextType = Context;
-    context!: React.ContextType<typeof Context>
-
+export class CarOders extends React.Component<CarOdersProps> {
     constructor(props: any) {
         super(props);
 
@@ -219,7 +225,7 @@ export class CarOders extends React.Component {
     }
 
     remove(order: IOrder) {
-        this.context.removeOrderedCar(order);
+        this.props.remove(order);
     }
 
     render() {
@@ -229,8 +235,8 @@ export class CarOders extends React.Component {
                     <Col>
                         <div style={{width: 800}} className="m-auto ">
                             <Container className="mt-4 mb-4" fluid>
-                                {!this.context.orders.length && <Row><Col><p className="h3">No orders</p></Col></Row>}
-                                {this.context.orders.map((order) => (
+                                {!this.props.orders.length && <Row><Col><p className="h3">No orders</p></Col></Row>}
+                                {this.props.orders.map((order) => (
                                     <Row key={order.id}>
                                         <Col lg="12" className="clearfix">
                                             <CarInfo car={order.car} isLoading={false}></CarInfo>

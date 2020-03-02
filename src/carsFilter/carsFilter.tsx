@@ -1,8 +1,8 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React from 'react';
 import { Form, Button } from 'react-bootstrap';
-import { Context, CarsStore } from '../context';
-import { useObserver, observer } from 'mobx-react';
-import { useHistory, useLocation, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Context, getParamsFromUrl } from '../context';
+import { observer } from 'mobx-react';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 
 @observer
@@ -22,7 +22,7 @@ class CarsFilter extends React.Component<RouteComponentProps, {
     }
 
     componentDidMount() {
-        const r = this.context.getParamsFromUrl(this.props.location.search);
+        const r = getParamsFromUrl(this.props.location.search);
 
         this.setState({
             color: r.get('color'),
@@ -32,7 +32,7 @@ class CarsFilter extends React.Component<RouteComponentProps, {
 
     componentDidUpdate(prevProps: any) {
         if (prevProps.location !== this.props.location) {
-            const r = this.context.getParamsFromUrl(this.props.location.search);
+            const r = getParamsFromUrl(this.props.location.search);
 
             this.setState({
                 color: r.get('color') || '',
@@ -52,7 +52,7 @@ class CarsFilter extends React.Component<RouteComponentProps, {
     search(e: React.FormEvent<HTMLButtonElement>) {
         e.preventDefault();
 
-        const params = this.context.getParamsFromUrl(this.props.location.search);
+        const params = getParamsFromUrl(this.props.location.search);
         params.set('page', 1);
         params.set('color', this.state.color);
         params.set('manufacturer', this.state.manufacturer);

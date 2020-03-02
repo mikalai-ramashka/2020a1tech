@@ -53,6 +53,19 @@ class FilterInfo {
     }
 }
 
+export function getParamsFromUrl(search: string) {
+    const url = search.substr(1);
+    const result = new Map();
+
+    url.split("&").forEach((part: string) => {
+        const item = part.split("=");
+        if (item[1] != undefined) {
+            result.set(item[0], decodeURIComponent(item[1]));
+        }
+    });
+    return result;
+}
+
 export class CarsStore {
     private _pageInfo: PageInfo;
     private _filterInfo: FilterInfo;
@@ -67,7 +80,7 @@ export class CarsStore {
         this._selectedCar = undefined;
         this._selectedCarLoading = true;
 
-        const r = this.getParamsFromUrl(window.location.search);
+        const r = getParamsFromUrl(window.location.search);
 
         this._filterInfo.colors = [r.get('color')];
         this._filterInfo.manufacturers = [r.get('manufacturer')];
@@ -81,19 +94,6 @@ export class CarsStore {
         reaction(() => this._orders.length, () => {
             localStorage.setItem("orders", JSON.stringify(toJS(this._orders)));
         });
-    }
-
-    getParamsFromUrl(search: string) {
-        const url = search.substr(1);
-        const result = new Map();
-
-        url.split("&").forEach((part: string) => {
-            const item = part.split("=");
-            if (item[1] != undefined) {
-                result.set(item[0], decodeURIComponent(item[1]));
-            }
-        });
-        return result;
     }
 
     @action load(page: number = 1, manufacturer: string, color: string) {
